@@ -1,0 +1,38 @@
+{
+  "name": "lessterfy",
+  "version": "0.4.2",
+  "description": "Find, compile and watch .less files corresponding to your browserify import tree",
+  "keywords": [
+    "less",
+    "build",
+    "css"
+  ],
+  "homepage": "https://github.com/jaredly/lessterfy",
+  "bugs": {
+    "url": "https://github.com/jaredly/lessterfy/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jaredly/lessterfy"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "dependencies": {
+    "chokidar": "~0.8.2",
+    "through": "~2.3.4",
+    "module-deps": "~1.10.0",
+    "subarg": "0.0.1"
+  },
+  "devDependencies": {
+    "rimraf": "~2.2.6",
+    "touch": "~0.0.3",
+    "less": "~1.7.0"
+  },
+  "peerDependencies": {
+    "less": "~1.7.0"
+  },
+  "author": "Jared Forsyth (jared@jaredforsyth.com)",
+  "license": "Apache v2"
+}
