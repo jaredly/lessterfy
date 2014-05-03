@@ -19,6 +19,9 @@
   "scripts": {
     "test": "make test"
   },
+  "bin": {
+    "lessterfy": "./bin.js"
+  },
   "dependencies": {
     "chokidar": "~0.8.2",
     "through": "~2.3.4",

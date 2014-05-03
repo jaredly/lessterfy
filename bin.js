@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 
 var subarg = require('subarg')
   , path = require('path')
@@ -9,8 +10,17 @@ raw.shift()
 
 var argv = subarg(raw)
 
-if (!argv._.length) {
-  console.log('Need a file')
+if (argv._.length !== 2) {
+  console.log('   Lessterfy! Collect and compile .less files accompanying a browserify-based app')
+  console.log('')
+  console.log('Usage: lessterfy input.js output.css [options]')
+  console.log('')
+  console.log('Options:')
+  console.log('')
+  console.log("      --once, -n   : don't watch. Just run once.")
+  console.log('      -p <path>    : Add to the less import path. Can be used multiple times')
+  console.log('      -t transform : Add a transformer. Can be used multiple times')
+  console.log('')
   process.exit(1)
 }
 
@@ -18,17 +28,21 @@ if (argv.p && !Array.isArray(argv.p)) {
   argv.p = [argv.p]
 }
 
-var output = argv.o
+var input = argv._[0]
+  , output = argv._[1]
   , Watcher = require('./')
 
   , lpath = ['./'].concat(argv.p || [])
-  , basefile = path.resolve(argv._[0])
+  , basefile = path.resolve(input)
   , basedir = path.dirname(basefile)
-  , mapfile = argv.o + '.map'
+  , mapfile = output + '.map'
+
+  , once = argv.once || argv.n
 
 new Watcher(basefile, {
-  filename: argv.o,
-  watch: true,
+  filename: output,
+  transform: argv.t || null,
+  watch: !once,
   less: {
     path: lpath,
   },

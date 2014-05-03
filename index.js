@@ -4,31 +4,44 @@ var fs = require('fs')
   , less = require('less')
   , through = require('through')
   , mdeps = require('module-deps')
-  , chokidar = require('chokidar');
+  , chokidar = require('chokidar')
+  , readline = require('readline')
 
 module.exports = Watcher
 
 function Watcher(basefile, options) {
   this.basefile = path.resolve(basefile)
   this.options = options
+
+  if (options.watch) {
+    this.rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+    this.rl.on('line', this.handleInput.bind(this))
+  }
 }
 
 Watcher.prototype = {
   run: function () {
     this.time = Date.now()
     process.stdout.write('Compiling...')
-    // console.log('goind', this.basefile)
-    getLessNodes(this.basefile, this.regenerate.bind(this))
+    getLessNodes(this.basefile, this.options.transform, this.regenerate.bind(this))
   },
-  regenerate: function (lessData) {
+  // you can trigger manually
+  handleInput: function (line) {
+    if (['run', 'r', 'build', 'b'].indexOf(line.toLowerCase()) === -1) return
+    this.run()
+  },
+  regenerate: function (lessData, files) {
     if (!lessData) {
-      return console.warn('No .less files found')
+      return console.warn('  No .less files found')
     }
     new(less.Parser)(this.options.less).parse(lessData, function (err, tree) {
       if (err) {
         throw err;
       } 
-      var filenames = getLessImports(tree)
+      var filenames = getLessImports(tree).concat(files)
       if (this.options.watch) {
         if (!this.watcher) {
           this.watcher = chokidar.watch(filenames, {persistent: true});
@@ -55,10 +68,13 @@ Watcher.prototype = {
   }
 }
 
-function getLessNodes(basefile, done) {
+function getLessNodes(basefile, transform, done) {
   var found = {}
     , lessData = ''
-  mdeps(basefile).pipe(through(function (data) {
+    , files = []
+  mdeps(basefile, {
+    transform: transform
+  }).pipe(through(function (data) {
     var file = data.id
       , ext = path.extname(file)
       , lesspath = file.slice(0, -ext.length) + '.less'
@@ -66,9 +82,10 @@ function getLessNodes(basefile, done) {
     found[lesspath] = true
     if (['.js', '.jsx'].indexOf(ext) !== -1 && fs.existsSync(lesspath)) {
       lessData += '@import "' + lesspath + '";\n';
+      files.push(file)
     }
   }, function end() {
-    done(lessData)
+    done(lessData, files)
   }))
 }
 
