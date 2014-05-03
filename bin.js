@@ -1,6 +1,7 @@
 
 var subarg = require('subarg')
   , path = require('path')
+  , fs = require('fs')
   , raw = process.argv
 
 if (raw[0] === 'node') raw.shift()
@@ -23,6 +24,7 @@ var output = argv.o
   , lpath = ['./'].concat(argv.p || [])
   , basefile = path.resolve(argv._[0])
   , basedir = path.dirname(basefile)
+  , mapfile = argv.o + '.map'
 
 new Watcher(basefile, {
   filename: argv.o,
@@ -33,9 +35,12 @@ new Watcher(basefile, {
   toCSS: {
     sourceMap: true,
     outputSourceFiles: true,
-    sourceMapFilename: 'party.css.map',
-    sourceMapOutputFilename: 'party.css.map',
-    sourceMapRootpath: path.basename(basedir),
+    sourceMapFilename: path.basename(mapfile),
+    sourceMapOutputFilename: path.basename(mapfile),
+    writeSourceMap: function (output) {
+      fs.writeFileSync(mapfile, output, 'utf8')
+    },
+    // sourceMapRootpath: path.basename(basedir),
     sourceMapBasepath: basedir
   }
 }).run()
