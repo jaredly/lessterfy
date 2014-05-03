@@ -1,5 +1,6 @@
 
 var subarg = require('subarg')
+  , path = require('path')
   , raw = process.argv
 
 if (raw[0] === 'node') raw.shift()
@@ -20,13 +21,22 @@ var output = argv.o
   , Watcher = require('./')
 
   , lpath = ['./'].concat(argv.p || [])
-  , basefile = argv._[0]
+  , basefile = path.resolve(argv._[0])
+  , basedir = path.dirname(basefile)
 
 new Watcher(basefile, {
   filename: argv.o,
   watch: true,
   less: {
-    path: lpath
+    path: lpath,
+  },
+  toCSS: {
+    sourceMap: true,
+    outputSourceFiles: true,
+    sourceMapFilename: 'party.css.map',
+    sourceMapOutputFilename: 'party.css.map',
+    sourceMapRootpath: path.basename(basedir),
+    sourceMapBasepath: basedir
   }
 }).run()
 
